@@ -19,6 +19,7 @@ import (
 var templateFS embed.FS
 
 func main() {
+	utils.ShowPreload()
 	// Initialize the project name form
 	projectForm := utils.NewProjectNameForm()
 	p := tea.NewProgram(projectForm)
