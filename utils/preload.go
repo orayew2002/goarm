@@ -21,6 +21,6 @@ const text = `  ____
  \____|\___/ \__'_|_|  |_| |_| |_|
 `
 
-func ShowPreload() {
-	fmt.Println(Green + text + Reset)
+func showPreload() {
+	fmt.Print(Green + text + Reset)
 }

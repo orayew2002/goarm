@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/orayew2002/goarm/utils"
 )
 
@@ -19,29 +18,15 @@ import (
 var templateFS embed.FS
 
 func main() {
-	utils.ShowPreload()
-	// Initialize the project name form
-	projectForm := utils.NewProjectNameForm()
-	p := tea.NewProgram(projectForm)
-
-	if _, err := p.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to run program: %v\n", err)
-		os.Exit(1)
-	}
-
-	projectName := projectForm.GetAppName()
-	if len(projectName) == 0 {
-		fmt.Fprintf(os.Stderr, "Project can't be empty")
-		os.Exit(1)
-	}
+	app := utils.OpenForm()
 
 	// Create project files and initialize go.mod
-	if err := createProjectFiles(projectName); err != nil {
+	if err := createProjectFiles(app.Name); err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating project files: %v\n", err)
 		os.Exit(1)
 	}
 
-	if err := initializeGoMod(projectName, projectName); err != nil {
+	if err := initializeGoMod(app.Name, app.Name); err != nil {
 		fmt.Fprintf(os.Stderr, "Error initializing go.mod: %v\n", err)
 		os.Exit(1)
 	}
