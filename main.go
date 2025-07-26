@@ -41,59 +41,78 @@ func main() {
 	fmt.Println("✅ Project setup completed successfully.")
 }
 
-// bindDependencies extracts embedded database files and writes them to the app's directory.
-// It creates Go source files (init.go, domain.go) and appends configuration content to multiple config files.
 func bindDependencies(appName string, dbType domain.DbType) error {
 	coreDB := dbType.ToCoreDatabase()
-	managerInstance := manager.Manage(coreDB)
+	dbValue := dbType.PackageVal()
+	manager := manager.Manage(coreDB)
 
 	baseDir := filepath.Join(appName, "pkg", coreDB)
 
-	// Step 1: Ensure the base directory exists
+	// ───── Step 1: Create base directory ─────
 	if err := os.MkdirAll(baseDir, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create directory %q: %w", baseDir, err)
 	}
 
-	// Step 2: Write source files to disk
-	filesToWrite := map[string][]byte{
-		"init.go":   managerInstance.Database.GetInit(),
-		"domain.go": managerInstance.Database.GetDomain(),
+	// ───── Step 2: Write Go source files ─────
+	files := map[string][]byte{
+		"init.go": manager.Database.GetInit(),
 	}
-
-	for fileName, content := range filesToWrite {
-		path := filepath.Join(baseDir, fileName)
-
+	for name, content := range files {
+		path := filepath.Join(baseDir, name)
 		if err := os.WriteFile(path, content, os.ModePerm); err != nil {
-			return fmt.Errorf("failed to write %q: %w", path, err)
+			return fmt.Errorf("failed to write file %q: %w", path, err)
 		}
 	}
 
-	// Step 3: Append config to all environment config files
-	configPaths := []string{
-		filepath.Join(appName, "etc", "dev.yaml"),
-		filepath.Join(appName, "etc", "local.yaml"),
-		filepath.Join(appName, "etc", "prod.yaml"),
-	}
-
-	for _, configPath := range configPaths {
-		if err := utils.AppendToFile(configPath, managerInstance.Database.GetConfig()); err != nil {
+	// ───── Step 3: Append config to env files ─────
+	envFiles := []string{"dev.yaml", "local.yaml", "prod.yaml"}
+	for _, env := range envFiles {
+		configPath := filepath.Join(appName, "etc", env)
+		if err := utils.AppendToFile(configPath, manager.Database.GetConfig()); err != nil {
 			return fmt.Errorf("failed to append config to %q: %w", configPath, err)
 		}
 	}
 
-	fieldName := dbType.ToCoreConfig()
-	packageName := dbType.ToCoreDatabase()
-	typeName := "Config"
-
-	structField := fmt.Sprintf("%s %s.%s `mapstructure:\"%s\" yaml:\"%s\"`", fieldName, packageName, typeName, dbType.ToCoreDatabase(), dbType.ToCoreDatabase())
-
-	structFilePath := fmt.Sprintf("%s/internal/domain/app.go", appName)
-	if err := utils.AppendFieldStruct(structFilePath, "AppConfig", structField); err != nil {
-		return fmt.Errorf("failed appen struct %w", err)
+	// ───── Step 4: Add field to AppConfig struct ─────
+	appStructPath := filepath.Join(appName, "internal", "domain", "app.go")
+	appField := fmt.Sprintf(`DB %s.Config `+"`mapstructure:\"%s\" yaml:\"%s\"`", coreDB, coreDB, coreDB)
+	if err := utils.AppendFieldStruct(appStructPath, "AppConfigs", appField); err != nil {
+		return fmt.Errorf("failed to append field to AppConfigs struct: %w", err)
 	}
 
-	if err := utils.AddImportToFile(structFilePath, fmt.Sprintf("%s/pkg/%s", appName, dbType.ToCoreDatabase())); err != nil {
-		return fmt.Errorf("failed add struct import %w", err)
+	// ───── Step 5: Add import for DB package ─────
+	if err := utils.AddImportToFile(appStructPath, filepath.Join(appName, "pkg", coreDB)); err != nil {
+		return fmt.Errorf("failed to add import to app.go: %w", err)
+	}
+
+	// ───── Step 6: Update Repo struct ─────
+	repoFile := filepath.Join(appName, "internal", "repo", "build.go")
+	if err := utils.AddImportToFile(repoFile, dbType.PackagePath()); err != nil {
+		return fmt.Errorf("failed to add DB import to repo/build.go: %w", err)
+	}
+
+	repoField := fmt.Sprintf("db *%s", dbValue)
+	if err := utils.AppendFieldStruct(repoFile, "Repo", repoField); err != nil {
+		return fmt.Errorf("failed to append field to Repo struct: %w", err)
+	}
+
+	// ───── Step 7: Update NewRepo constructor ─────
+	if err := utils.AppendFuncArgument(repoFile, "NewRepo", "db", "*"+dbValue); err != nil {
+		return fmt.Errorf("failed to append argument to NewRepo function: %w", err)
+	}
+	if err := utils.AddReturnFieldToConstructor(repoFile, "NewRepo", "db"); err != nil {
+		return fmt.Errorf("failed to set constructor return value: %w", err)
+	}
+
+	// ───── Step 8: Update app run layer ─────
+	appRunFile := filepath.Join(appName, "internal", "app", "build.go")
+	if err := utils.AddImportToFile(appRunFile, filepath.Join(appName, "pkg", coreDB)); err != nil {
+		return fmt.Errorf("failed to add DB import to app/build.go: %w", err)
+	}
+
+	callArg := fmt.Sprintf("%s.NewClient(appConfig.DB)", coreDB)
+	if err := utils.AddArgumentToFunctionCall(appRunFile, "repo.NewRepo", callArg); err != nil {
+		return fmt.Errorf("failed to inject database client into repo.NewRepo: %w", err)
 	}
 
 	return nil

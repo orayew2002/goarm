@@ -50,6 +50,34 @@ func (d DbType) ToCoreConfig() string {
 	}
 }
 
+// ToCoreDatabase returns the internal key used for this DbType (e.g., for folder or driver names).
+func (d DbType) PackagePath() string {
+	switch d {
+	case DBTypeMySQL:
+		return "database/sql"
+	case DBTypeSQLite:
+		return "database/sql"
+	case DBTypePostgres:
+		return "github.com/jackc/pgx/v5/pgxpool"
+	default:
+		return ""
+	}
+}
+
+// ToCoreDatabase returns the internal key used for this DbType (e.g., for folder or driver names).
+func (d DbType) PackageVal() string {
+	switch d {
+	case DBTypeMySQL:
+		return "sql.DB"
+	case DBTypeSQLite:
+		return "sql.DB"
+	case DBTypePostgres:
+		return "pgxpool.Pool"
+	default:
+		return ""
+	}
+}
+
 // ParseDbTypeFromLabel returns the core database key (e.g., "mysql", "sqlite", "pgxpool")
 // from a human-readable label like "MySql" or "Postgres (pgxpool)".
 // If the label is unknown, it returns an empty string.

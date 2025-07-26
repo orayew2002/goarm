@@ -1,11 +1,7 @@
 package repo
 
-type Repo struct {
-	db DB
-}
+type Repo struct{}
 
-func NewRepo(db DB) *Repo {
-	return &Repo{
-		db: db,
-	}
+func NewRepo() *Repo {
+	return &Repo{}
 }

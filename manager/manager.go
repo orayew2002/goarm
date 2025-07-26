@@ -30,16 +30,11 @@ type Manager struct {
 // DatabaseFiles holds the key source files for a database driver
 type DatabaseFiles struct {
 	config []byte
-	domain []byte
 	init   []byte
 }
 
 func (df *DatabaseFiles) GetConfig() []byte {
 	return df.config
-}
-
-func (df *DatabaseFiles) GetDomain() []byte {
-	return df.domain
 }
 
 func (df *DatabaseFiles) GetInit() []byte {
@@ -60,11 +55,6 @@ func Manage(database string) *Manager {
 		panic(fmt.Errorf("failed to load config.yaml: %w", err))
 	}
 
-	domain, err := readFile(fsys, basePath+"/domain.go")
-	if err != nil {
-		panic(fmt.Errorf("failed to load domain.go: %w", err))
-	}
-
 	initCode, err := readFile(fsys, basePath+"/init.go")
 	if err != nil {
 		panic(fmt.Errorf("failed to load init.go: %w", err))
@@ -73,7 +63,6 @@ func Manage(database string) *Manager {
 	return &Manager{
 		Database: DatabaseFiles{
 			config: config,
-			domain: domain,
 			init:   initCode,
 		},
 	}

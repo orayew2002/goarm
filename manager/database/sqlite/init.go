@@ -1,81 +1,54 @@
 package sqlite
 
 import (
-	"context"
 	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type Config struct {
+	Path string `yaml:"path"`
+}
 
 type connection struct {
 	db *sql.DB
 }
 
-func Connect(config Config) (*connection, error) {
+// NewClient creates a SQLite connection.
+// If the database file or its directory doesn't exist, they will be created.
+// Panics on any failure.
+func NewClient(config Config) *sql.DB {
+	if config.Path == "" {
+		panic("sqlite config error: database path is empty")
+	}
+
+	// Ensure parent directory exists
+	dir := filepath.Dir(config.Path)
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		panic(fmt.Sprintf("sqlite directory creation error: %v", err))
+	}
+
+	// Ensure the file exists (create if missing)
+	file, err := os.OpenFile(config.Path, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		panic(fmt.Sprintf("sqlite file creation/opening error: %v", err))
+	}
+	file.Close()
+
+	// Open DB connection
 	db, err := sql.Open("sqlite3", config.Path)
 	if err != nil {
-		return nil, err
+		panic(fmt.Sprintf("sqlite open error: %v", err))
 	}
 
+	// Ping to verify
 	if err := db.Ping(); err != nil {
-		db.Close()
-		return nil, err
+		_ = db.Close()
+		panic(fmt.Sprintf("sqlite ping error: %v", err))
 	}
 
-	return &connection{db: db}, nil
-}
-
-func (c connection) Exec(ctx context.Context, query string, args ...any) (*result, error) {
-	r, err := c.db.ExecContext(ctx, query, args...)
-	if err != nil {
-		return &result{}, err
-	}
-
-	af, err := r.RowsAffected()
-	if err != nil {
-		return &result{}, err
-	}
-
-	return &result{Count: af}, nil
-}
-
-func (c connection) Query(ctx context.Context, query string, args ...any) (*sqlRows, error) {
-	r, err := c.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return &sqlRows{}, err
-	}
-
-	return &sqlRows{rows: r}, nil
-}
-
-func (c connection) Close() error {
-	return nil
-}
-
-type result struct {
-	Count int64
-}
-
-func (r *result) RowsAffected() int64 {
-	return r.Count
-}
-
-type sqlRows struct {
-	rows *sql.Rows
-}
-
-func (r *sqlRows) Next() bool {
-	return r.rows.Next()
-}
-
-func (r *sqlRows) Scan(dest ...any) error {
-	return r.rows.Scan(dest...)
-}
-
-func (r *sqlRows) Close() {
-	_ = r.rows.Close()
-}
-
-func (r *sqlRows) Err() error {
-	return r.rows.Err()
+	return db
 }
