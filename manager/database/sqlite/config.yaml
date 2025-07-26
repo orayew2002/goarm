@@ -1,0 +1,2 @@
+sqlite:
+  path: "database/sqlite.db"

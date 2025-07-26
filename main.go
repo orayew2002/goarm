@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/orayew2002/goarm/domain"
+	"github.com/orayew2002/goarm/manager"
 	"github.com/orayew2002/goarm/utils"
 )
 
@@ -26,12 +28,47 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := bindDependencies(app.Name, app.DbType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error initializing go.mod: %v\n", err)
+		os.Exit(1)
+	}
+
 	if err := initializeGoMod(app.Name, app.Name); err != nil {
 		fmt.Fprintf(os.Stderr, "Error initializing go.mod: %v\n", err)
 		os.Exit(1)
 	}
 
 	fmt.Println("✅ Project setup completed successfully.")
+}
+
+// bindDependencies writes embedded database files to disk under the app directory.
+// It creates the necessary files: config.yaml, init.go, and domain.go.
+func bindDependencies(appName string, database domain.DbType) error {
+	mngr := manager.Manage(database.ToCoreDatabase())
+	baseDir := filepath.Join(appName, "pkg", database.ToCoreDatabase())
+
+	// Define files to write: filename -> content provider function
+	files := map[string]func() []byte{
+		"config.yaml": mngr.Database.GetConfig,
+		"init.go":     mngr.Database.GetInit,
+		"domain.go":   mngr.Database.GetDomain,
+	}
+
+	// Ensure base directory exists
+	if err := os.MkdirAll(baseDir, os.ModePerm); err != nil {
+		return fmt.Errorf("failed to create directory %q: %w", baseDir, err)
+	}
+
+	// Write all files
+	for filename, contentFunc := range files {
+		filePath := filepath.Join(baseDir, filename)
+
+		if err := os.WriteFile(filePath, contentFunc(), os.ModePerm); err != nil {
+			return fmt.Errorf("failed to write %q: %w", filePath, err)
+		}
+	}
+
+	return nil
 }
 
 // createProjectFiles copies template files to the new project directory,

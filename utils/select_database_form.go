@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/orayew2002/goarm/domain"
 )
 
 const sdfListHeight = 6
@@ -84,10 +85,9 @@ func (m DatabaseSelectForm) GetChoice() string {
 }
 
 func newDatabaseSelectForm() DatabaseSelectForm {
-	items := []list.Item{
-		DatabaseItem("Postgres (pgxpool)"),
-		DatabaseItem("MySQL"),
-		DatabaseItem("SQLite"),
+	items := make([]list.Item, len(domain.SupportedDatabaseTypes))
+	for index, _ := range domain.SupportedDatabaseTypes {
+		items[index] = DatabaseItem(domain.SupportedDatabaseTypes[index])
 	}
 
 	const defaultWidth = 40

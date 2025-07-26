@@ -42,7 +42,7 @@ func OpenForm() domain.App {
 	clearScreen()
 	return domain.App{
 		Name:   projectForm.GetAppName(),
-		DbType: databaseForm.GetChoice(),
+		DbType: domain.DbType(databaseForm.GetChoice()),
 	}
 }
 
