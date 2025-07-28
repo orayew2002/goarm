@@ -3,6 +3,7 @@ package pgxpool
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -17,7 +18,12 @@ type Config struct {
 }
 
 // NewClient creates a new PostgreSQL connection pool and panics on failure.
+// It overrides cfg.Host with DB_HOST env variable if set.
 func NewClient(cfg Config) *pgxpool.Pool {
+	if envHost := os.Getenv("DB_HOST"); envHost != "" {
+		cfg.Host = envHost
+	}
+
 	sslmode := cfg.SSLMode
 	if sslmode == "" {
 		sslmode = "disable"

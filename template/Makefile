@@ -1,6 +1,27 @@
-prod: tidy vet linter test
-	go run cmd/app/main.go
+# Default host (for local dev)
+DB_HOST ?= localhost
 
+# Run the app with DB_HOST injected
+prod: tidy vet linter test
+	DB_HOST=$(DB_HOST) go run cmd/app/main.go
+
+run:
+	DB_HOST=$(DB_HOST) go run cmd/app/main.go
+
+build:
+	DB_HOST=$(DB_HOST) go build -o bin/app cmd/app/main.go
+
+docker-build:
+	docker build \
+		--build-arg DB_HOST=host.docker.internal \
+		-t myapp:latest .
+
+docker-run:
+	docker run --rm \
+		-e DB_HOST=host.docker.internal \
+		-p 8080:8080 myapp:latest
+
+# Everything else remains the same...
 vet:
 	go vet ./...
 
@@ -12,12 +33,6 @@ tidy:
 
 test:
 	@go test -v ./...
-
-run:
-	go run cmd/app/main.go
-
-build:
-	go build -o bin/app cmd/app/main.go
 
 clean:
 	@rm -rf bin
@@ -34,12 +49,6 @@ doc:
 
 deps:
 	@go mod download
-
-docker-build:
-	docker build -t myapp:latest .
-
-docker-run:
-	docker run --rm -p 8080:8080 myapp:latest
 
 up:
 	docker compose up --build -d

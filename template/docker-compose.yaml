@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -12,7 +10,9 @@ services:
       - "8080:8080"
     networks:
       - app-network
-
+    environment:
+      - DB_HOST=host.docker.internal
+ 
   @db
 
 volumes:

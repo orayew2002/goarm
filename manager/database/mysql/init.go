@@ -3,6 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -15,7 +16,14 @@ type Config struct {
 	Database string `json:"database"`
 }
 
-func NewClient(cfg Config) *sql.DB {
+// NewClient creates a new MySQL client with given config.
+// If environment variable DB_HOST is set, it overrides cfg.Host.
+// Returns an open and pinged *sql.DB or an error.
+func NewClient(cfg Config) (*sql.DB, error) {
+	if envHost := os.Getenv("DB_HOST"); envHost != "" {
+		cfg.Host = envHost
+	}
+
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
 		cfg.Username,
 		cfg.Password,
@@ -26,13 +34,14 @@ func NewClient(cfg Config) *sql.DB {
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		panic("error opening mysql connection")
+		return nil, fmt.Errorf("error opening mysql connection: %w", err)
 	}
 
+	// Test connection with Ping
 	if err := db.Ping(); err != nil {
 		db.Close()
-		panic("can't ping")
+		return nil, fmt.Errorf("can't ping mysql: %w", err)
 	}
 
-	return db
+	return db, nil
 }
