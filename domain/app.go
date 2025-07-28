@@ -78,6 +78,55 @@ func (d DbType) PackageVal() string {
 	}
 }
 
+func (d DbType) GetDockerConfig() string {
+	switch d {
+	case DBTypePostgres:
+		return `
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: your_database
+      POSTGRES_USER: your_username
+      POSTGRES_PASSWORD: your_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+`
+	case DBTypeMySQL:
+		return `
+  db:
+    image: mysql:8
+    container_name: mysql_db
+    environment:
+      MYSQL_DATABASE: your_database
+      MYSQL_ROOT_PASSWORD: your_password
+      MYSQL_USER: your_username
+      MYSQL_PASSWORD: your_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - app-network
+`
+	case DBTypeSQLite:
+		return `
+  # SQLite is file-based and doesn't run as a container.
+  # Your application must mount a shared volume to persist the .db file.
+
+  # Example volume mount in app service (not a real DB container):
+  # volumes:
+  #   - ./data:/app/data
+`
+	default:
+		return ""
+	}
+}
+
 // ParseDbTypeFromLabel returns the core database key (e.g., "mysql", "sqlite", "pgxpool")
 // from a human-readable label like "MySql" or "Postgres (pgxpool)".
 // If the label is unknown, it returns an empty string.

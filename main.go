@@ -17,6 +17,9 @@ import (
 //go:embed template/**/*
 //go:embed template/.golangci.yml
 //go:embed template/Makefile
+//go:embed template/Dockerfile
+//go:embed template/docker-compose.yaml
+//go:embed template/.dockerignore
 var templateFS embed.FS
 
 func main() {
@@ -113,6 +116,18 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 	callArg := fmt.Sprintf("%s.NewClient(appConfig.DB)", coreDB)
 	if err := utils.AddArgumentToFunctionCall(appRunFile, "repo.NewRepo", callArg); err != nil {
 		return fmt.Errorf("failed to inject database client into repo.NewRepo: %w", err)
+	}
+
+	dockerComposeFile := fmt.Sprintf("%s/docker-compose.yaml", appName)
+	fileBody, err := os.ReadFile(dockerComposeFile)
+	if err != nil {
+		return fmt.Errorf("failed to open docker-compose file: %w", err)
+	}
+
+	// Replace the "@db" placeholder with the actual DB config
+	fileContent := strings.Replace(string(fileBody), "@db", dbType.GetDockerConfig(), 1)
+	if err := os.WriteFile(dockerComposeFile, []byte(fileContent), 0644); err != nil {
+		return fmt.Errorf("failed to write to docker-compose file: %w", err)
 	}
 
 	return nil
