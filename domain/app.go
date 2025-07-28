@@ -91,8 +91,6 @@ func (d DbType) GetDockerConfig() string {
       POSTGRES_PASSWORD: your_password
     ports:
       - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
 `
@@ -108,8 +106,6 @@ func (d DbType) GetDockerConfig() string {
       MYSQL_PASSWORD: your_password
     ports:
       - "3306:3306"
-    volumes:
-      - mysqldata:/var/lib/mysql
     networks:
       - app-network
 `
@@ -122,6 +118,16 @@ func (d DbType) GetDockerConfig() string {
   # volumes:
   #   - ./data:/app/data
 `
+	default:
+		return ""
+	}
+}
+
+func (d DbType) GetDockerDependence() string {
+	switch d {
+	case DBTypePostgres, DBTypeMySQL:
+		return `depends_on:
+      - db`
 	default:
 		return ""
 	}

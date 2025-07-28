@@ -126,6 +126,8 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 
 	// Replace the "@db" placeholder with the actual DB config
 	fileContent := strings.Replace(string(fileBody), "@db", dbType.GetDockerConfig(), 1)
+	fileContent = strings.Replace(fileContent, "@dn", dbType.GetDockerDependence(), 1)
+
 	if err := os.WriteFile(dockerComposeFile, []byte(fileContent), 0644); err != nil {
 		return fmt.Errorf("failed to write to docker-compose file: %w", err)
 	}

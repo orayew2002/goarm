@@ -18,8 +18,8 @@ type Config struct {
 
 // NewClient creates a new MySQL client with given config.
 // If environment variable DB_HOST is set, it overrides cfg.Host.
-// Returns an open and pinged *sql.DB or an error.
-func NewClient(cfg Config) (*sql.DB, error) {
+// Panics on any error.
+func NewClient(cfg Config) *sql.DB {
 	if envHost := os.Getenv("DB_HOST"); envHost != "" {
 		cfg.Host = envHost
 	}
@@ -34,14 +34,14 @@ func NewClient(cfg Config) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		return nil, fmt.Errorf("error opening mysql connection: %w", err)
+		panic(fmt.Sprintf("error opening mysql connection: %v", err))
 	}
 
 	// Test connection with Ping
 	if err := db.Ping(); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("can't ping mysql: %w", err)
+		panic(fmt.Sprintf("can't ping mysql: %v", err))
 	}
 
-	return db, nil
+	return db
 }
