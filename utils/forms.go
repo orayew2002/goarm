@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MH-KodaCore/goarm/domain"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/orayew2002/goarm/domain"
 )
 
 func OpenForm() domain.App {
