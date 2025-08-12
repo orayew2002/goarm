@@ -1,3 +1,5 @@
+version: "2"
+
 linters:
   enable:
     - govet
@@ -21,8 +23,17 @@ linters:
     - rowserrcheck
     - sqlclosecheck
 
+formatters:
+  enable:
+    - goimports
+    - gofumpt
+    - golines
+
+  settings:
+    goimports:
+      local-prefixes:
+        - <package_name>
+
 run:
   timeout: 5m
   tests: true
-
-version: "2"

@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -41,6 +42,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := utils.UpdatePackageNameOnGCI(app.Name); err != nil {
+		fmt.Fprintf(os.Stderr, "Error updating package name for .golangci.yml file: %v\n", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("✅ Project setup completed successfully.")
 }
 
@@ -49,7 +55,7 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 	dbValue := dbType.PackageVal()
 	manager := manager.Manage(coreDB)
 
-	baseDir := filepath.Join(appName, "pkg", coreDB)
+	baseDir := path.Join(appName, "pkg", coreDB)
 
 	// ───── Step 1: Create base directory ─────
 	if err := os.MkdirAll(baseDir, os.ModePerm); err != nil {
@@ -61,7 +67,7 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 		"init.go": manager.Database.GetInit(),
 	}
 	for name, content := range files {
-		path := filepath.Join(baseDir, name)
+		path := path.Join(baseDir, name)
 		if err := os.WriteFile(path, content, os.ModePerm); err != nil {
 			return fmt.Errorf("failed to write file %q: %w", path, err)
 		}
@@ -70,26 +76,26 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 	// ───── Step 3: Append config to env files ─────
 	envFiles := []string{"dev.yaml", "local.yaml", "prod.yaml"}
 	for _, env := range envFiles {
-		configPath := filepath.Join(appName, "etc", env)
+		configPath := path.Join(appName, "etc", env)
 		if err := utils.AppendToFile(configPath, manager.Database.GetConfig()); err != nil {
 			return fmt.Errorf("failed to append config to %q: %w", configPath, err)
 		}
 	}
 
 	// ───── Step 4: Add field to AppConfig struct ─────
-	appStructPath := filepath.Join(appName, "internal", "domain", "app.go")
+	appStructPath := path.Join(appName, "internal", "domain", "app.go")
 	appField := fmt.Sprintf(`DB %s.Config `+"`mapstructure:\"%s\" yaml:\"%s\"`", coreDB, coreDB, coreDB)
 	if err := utils.AppendFieldStruct(appStructPath, "AppConfigs", appField); err != nil {
 		return fmt.Errorf("failed to append field to AppConfigs struct: %w", err)
 	}
 
 	// ───── Step 5: Add import for DB package ─────
-	if err := utils.AddImportToFile(appStructPath, filepath.Join(appName, "pkg", coreDB)); err != nil {
+	if err := utils.AddImportToFile(appStructPath, path.Join(appName, "pkg", coreDB)); err != nil {
 		return fmt.Errorf("failed to add import to app.go: %w", err)
 	}
 
 	// ───── Step 6: Update Repo struct ─────
-	repoFile := filepath.Join(appName, "internal", "repo", "build.go")
+	repoFile := path.Join(appName, "internal", "repo", "build.go")
 	if err := utils.AddImportToFile(repoFile, dbType.PackagePath()); err != nil {
 		return fmt.Errorf("failed to add DB import to repo/build.go: %w", err)
 	}
@@ -108,8 +114,8 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 	}
 
 	// ───── Step 8: Update app run layer ─────
-	appRunFile := filepath.Join(appName, "internal", "app", "build.go")
-	if err := utils.AddImportToFile(appRunFile, filepath.Join(appName, "pkg", coreDB)); err != nil {
+	appRunFile := path.Join(appName, "internal", "app", "build.go")
+	if err := utils.AddImportToFile(appRunFile, path.Join(appName, "pkg", coreDB)); err != nil {
 		return fmt.Errorf("failed to add DB import to app/build.go: %w", err)
 	}
 
@@ -128,7 +134,7 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 	fileContent := strings.Replace(string(fileBody), "@db", dbType.GetDockerConfig(), 1)
 	fileContent = strings.Replace(fileContent, "@dn", dbType.GetDockerDependence(), 1)
 
-	if err := os.WriteFile(dockerComposeFile, []byte(fileContent), 0644); err != nil {
+	if err := os.WriteFile(dockerComposeFile, []byte(fileContent), 0o644); err != nil {
 		return fmt.Errorf("failed to write to docker-compose file: %w", err)
 	}
 
@@ -172,7 +178,6 @@ func createProjectFiles(projectName string) error {
 		// Write the updated content to the target file
 		return os.WriteFile(targetPath, []byte(updatedContent), os.ModePerm)
 	})
-
 	if err != nil {
 		return err
 	}

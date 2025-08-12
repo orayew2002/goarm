@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"path/filepath"
+	"path"
 
 	"template/internal/app"
 	"template/internal/domain"
@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	var appConfig domain.AppConfigs
-	configFile := filepath.Join("etc", *appConf+".yaml")
+	configFile := path.Join("etc", *appConf+".yaml")
 
 	if err := viper.Parse(configFile, &appConfig); err != nil {
 		panic(fmt.Sprintf("error parse configs error:%+v", err))
