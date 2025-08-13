@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/orayew2002/goarm/domain"
-	"github.com/orayew2002/goarm/manager"
-	"github.com/orayew2002/goarm/utils"
+	"github.com/MH-KodaCore/goarm/domain"
+	"github.com/MH-KodaCore/goarm/manager"
+	"github.com/MH-KodaCore/goarm/utils"
 )
 
 //go:embed template/**/*

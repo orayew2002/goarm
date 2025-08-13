@@ -32,7 +32,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/orayew2002/goarm
+        - github.com/MH-KodaCore/goarm
 
 run:
   timeout: 5m
