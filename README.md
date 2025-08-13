@@ -1,22 +1,20 @@
-# Go
+# Golang Architecture Maker
 
-## Demonstration
-
-> **Only for Golang backend developers**
+https://github.com/user-attachments/assets/d996b362-8f06-46a3-851d-5b8c8559afb4
 
 ## What is that?
 
 Binary which create a ready project to run a server with preinstalled dependencies/tools:
 
-- [x] `gin`
-- [x] `viper`
-- [x] `pgxpool`/`mysql`/`go-sqlite3`
-- [x] `jwt`
-- [x] `docker`
-- [x] `linters`
-- [x] `Makefile`
-- [x] `best practice architecture`
-- [ ] `postman collection`
+- ✅ `gin`
+- ✅ `viper`
+- ✅ `pgxpool`/`mysql`/`go-sqlite3`
+- ✅ `jwt`
+- ✅ `docker`
+- ✅ `linters`
+- ✅ `Makefile`
+- ✅ `best practice architecture`
+- ❌ `postman collection`
 
 ## Why?
 
@@ -29,7 +27,7 @@ Every time when you need to create a project, need to:
 - ...
 
 and other things. It's really hard to do it every time and it's very annoying. So this project
-will help you to prevent routen
+will help you to prevent routine
 
 ## Contributions
 
@@ -37,4 +35,4 @@ We will happy to get a help from you
 
 - Just fork it
 - Modify code
-- Create pull request
+- Create a pull request
