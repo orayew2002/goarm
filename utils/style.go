@@ -30,4 +30,10 @@ var (
 				PaddingLeft(1).
 				Foreground(lipgloss.Color("10")).
 				Bold(true)
+
+	errorStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FF6B6B")).
+			Bold(true).
+			Padding(0, 1).
+			MarginTop(1)
 )
