@@ -2,13 +2,16 @@ package utils
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type ProjectNameForm struct {
-	input textinput.Model
+	input        textinput.Model
+	errorMessage string
 }
 
 func newProjectNameForm() *ProjectNameForm {
@@ -21,7 +24,8 @@ func newProjectNameForm() *ProjectNameForm {
 	ti.Prompt = ""
 
 	return &ProjectNameForm{
-		input: ti,
+		input:        ti,
+		errorMessage: "",
 	}
 }
 
@@ -41,7 +45,12 @@ func (m *ProjectNameForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			return m, tea.Quit
+			if m.isValidProjectName(m.input.Value()) {
+				m.errorMessage = ""
+				return m, tea.Quit
+			} else {
+				m.errorMessage = "Invalid project name. Use only letters, numbers, hyphens and underscores (no spaces)."
+			}
 		}
 	}
 
@@ -53,9 +62,30 @@ func (m *ProjectNameForm) View() string {
 	title := titleStyle.Render("🚀 New Project Setup")
 	inputBox := boxStyle.Render(m.input.View())
 
-	return fmt.Sprintf("%s \n%s", title, inputBox)
+	result := fmt.Sprintf("%s \n%s", title, inputBox)
+
+	if m.errorMessage != "" {
+		errorBox := errorStyle.Render(m.errorMessage)
+		result += fmt.Sprintf("\n%s", errorBox)
+	}
+
+	return result
 }
 
 func (m *ProjectNameForm) GetAppName() string {
 	return m.input.Value()
+}
+
+// isValidProjectName validates that the project name is suitable for go mod init
+func (m *ProjectNameForm) isValidProjectName(name string) bool {
+	if strings.TrimSpace(name) == "" {
+		return false
+	}
+
+	if strings.Contains(name, " ") {
+		return false
+	}
+
+	validName := regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+	return validName.MatchString(name)
 }
