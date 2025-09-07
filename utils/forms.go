@@ -24,6 +24,20 @@ func OpenForm() domain.App {
 		os.Exit(1)
 	}
 
+	// Clear before framework selection
+	clearScreen()
+	frameworkForm := newFrameworkSelectForm()
+
+	if _, err := tea.NewProgram(&frameworkForm).Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to run framework select form: %v\n", err)
+		os.Exit(1)
+	}
+
+	if len(frameworkForm.GetChoice()) == 0 {
+		fmt.Fprintln(os.Stderr, "Project framework cannot be empty.")
+		os.Exit(1)
+	}
+
 	// Clear before database selection
 	clearScreen()
 	databaseForm := newDatabaseSelectForm()
@@ -41,8 +55,9 @@ func OpenForm() domain.App {
 	// Return app struct (capture DB choice here if needed)
 	clearScreen()
 	return domain.App{
-		Name:   projectForm.GetAppName(),
-		DbType: domain.DbType(databaseForm.GetChoice()),
+		Name:      projectForm.GetAppName(),
+		Framework: domain.FrameworkType(frameworkForm.GetChoice()),
+		DbType:    domain.DbType(databaseForm.GetChoice()),
 	}
 }
 

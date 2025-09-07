@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"template/pkg/http"
-
 	"github.com/gin-gonic/gin"
+
+	"templates/pkg/http"
 )
 
 type Handler struct {

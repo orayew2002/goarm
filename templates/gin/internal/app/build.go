@@ -1,12 +1,12 @@
 package app
 
 import (
-	"template/internal/domain"
-	"template/internal/handler"
-	"template/internal/repo"
-	"template/internal/service"
-
 	"github.com/gin-gonic/gin"
+
+	"templates/internal/domain"
+	"templates/internal/handler"
+	"templates/internal/repo"
+	"templates/internal/service"
 )
 
 func Run(appConfig domain.AppConfigs) error {

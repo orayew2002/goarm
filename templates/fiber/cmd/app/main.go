@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"path"
 
-	"template/internal/app"
-	"template/internal/domain"
-	"template/pkg/config/viper"
+	"templates/internal/app"
+	"templates/internal/domain"
+	"templates/pkg/config/viper"
 )
 
 func main() {

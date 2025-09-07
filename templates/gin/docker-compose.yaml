@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_app
+    @dn
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    environment:
+      - DB_HOST=host.docker.internal
+    restart: unless-stopped  
+  @db
+
+volumes:
+  pgdata:
+
+networks:
+  app-network:
+    driver: bridge

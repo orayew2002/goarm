@@ -2,12 +2,21 @@ package domain
 
 // App holds metadata about the application.
 type App struct {
-	Name   string
-	DbType DbType
+	Name      string
+	DbType    DbType
+	Framework FrameworkType
 }
+
+// FrameworkType represents a supported web framework type.
+type FrameworkType string
 
 // DbType represents a supported database type.
 type DbType string
+
+const (
+	FrameworkTypeGin   FrameworkType = "Gin"
+	FrameworkTypeFiber FrameworkType = "Fiber"
+)
 
 const (
 	DBTypePostgres DbType = "Postgres (pgxpool)"
@@ -15,11 +24,29 @@ const (
 	DBTypeSQLite   DbType = "Sqlite"
 )
 
+// SupportedFrameworkTypes lists all available framework types.
+var SupportedFrameworkTypes = []FrameworkType{
+	FrameworkTypeGin,
+	FrameworkTypeFiber,
+}
+
 // SupportedDatabaseTypes lists all available database types.
 var SupportedDatabaseTypes = []DbType{
 	DBTypePostgres,
 	DBTypeMySQL,
 	DBTypeSQLite,
+}
+
+// ToDirectory returns the directory name for this FrameworkType.
+func (f FrameworkType) ToDirectory() string {
+	switch f {
+	case FrameworkTypeGin:
+		return "gin"
+	case FrameworkTypeFiber:
+		return "fiber"
+	default:
+		return ""
+	}
 }
 
 // ToCoreDatabase returns the internal key used for this DbType (e.g., for folder or driver names).

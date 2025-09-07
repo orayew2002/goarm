@@ -31,6 +31,15 @@ var (
 				Foreground(lipgloss.Color("10")).
 				Bold(true)
 
+	sffItemStyle = lipgloss.NewStyle().
+			PaddingLeft(2).
+			Foreground(lipgloss.Color("#00BFFF"))
+
+	sffSelectedItemStyle = lipgloss.NewStyle().
+				PaddingLeft(1).
+				Foreground(lipgloss.Color("10")).
+				Bold(true)
+
 	errorStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FF6B6B")).
 			Bold(true).
