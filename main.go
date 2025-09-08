@@ -16,16 +16,6 @@ import (
 )
 
 //go:embed templates/**/*
-//go:embed templates/gin/.golangci.yml
-//go:embed templates/gin/Makefile
-//go:embed templates/gin/Dockerfile
-//go:embed templates/gin/docker-compose.yaml
-//go:embed templates/gin/.dockerignore
-//go:embed templates/fiber/.golangci.yml
-//go:embed templates/fiber/Makefile
-//go:embed templates/fiber/Dockerfile
-//go:embed templates/fiber/docker-compose.yaml
-//go:embed templates/fiber/.dockerignore
 var templatesFS embed.FS
 
 func main() {
@@ -166,7 +156,7 @@ func createProjectFiles(projectName string, framework domain.FrameworkType) erro
 		}
 
 		// Replace "template" with the project name inside file content
-		updatedContent := strings.ReplaceAll(string(content), "template", projectName)
+		updatedContent := strings.ReplaceAll(string(content), "templates", projectName)
 
 		// Calculate relative path and target destination path
 		relativePath, err := filepath.Rel(templatesDir, path)
