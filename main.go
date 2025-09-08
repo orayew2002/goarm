@@ -15,19 +15,23 @@ import (
 	"github.com/MH-KodaCore/goarm/utils"
 )
 
-//go:embed template/**/*
-//go:embed template/.golangci.yml
-//go:embed template/Makefile
-//go:embed template/Dockerfile
-//go:embed template/docker-compose.yaml
-//go:embed template/.dockerignore
-var templateFS embed.FS
+//go:embed templates/**/*
+//go:embed templates/gin/.golangci.yml
+//go:embed templates/gin/Makefile
+//go:embed templates/gin/Dockerfile
+//go:embed templates/gin/docker-compose.yaml
+//go:embed templates/gin/.dockerignore
+//go:embed templates/fiber/.golangci.yml
+//go:embed templates/fiber/Makefile
+//go:embed templates/fiber/Dockerfile
+//go:embed templates/fiber/docker-compose.yaml
+//go:embed templates/fiber/.dockerignore
+var templatesFS embed.FS
 
 func main() {
 	app := utils.OpenForm()
 
-	// Create project files and initialize go.mod
-	if err := createProjectFiles(app.Name); err != nil {
+	if err := createProjectFiles(app.Name, app.Framework); err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating project files: %v\n", err)
 		os.Exit(1)
 	}
@@ -143,8 +147,9 @@ func bindDependencies(appName string, dbType domain.DbType) error {
 
 // createProjectFiles copies template files to the new project directory,
 // replacing the string "template" with the project name in the file contents and paths.
-func createProjectFiles(projectName string) error {
-	err := fs.WalkDir(templateFS, "template", func(path string, d fs.DirEntry, err error) error {
+func createProjectFiles(projectName string, framework domain.FrameworkType) error {
+	templatesDir := "templates/" + framework.ToDirectory()
+	err := fs.WalkDir(templatesFS, templatesDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -155,7 +160,7 @@ func createProjectFiles(projectName string) error {
 		}
 
 		// Read file content
-		content, err := templateFS.ReadFile(path)
+		content, err := templatesFS.ReadFile(path)
 		if err != nil {
 			return err
 		}
@@ -164,7 +169,7 @@ func createProjectFiles(projectName string) error {
 		updatedContent := strings.ReplaceAll(string(content), "template", projectName)
 
 		// Calculate relative path and target destination path
-		relativePath, err := filepath.Rel("template", path)
+		relativePath, err := filepath.Rel(templatesDir, path)
 		if err != nil {
 			return err
 		}
