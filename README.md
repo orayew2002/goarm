@@ -6,7 +6,7 @@ https://github.com/user-attachments/assets/d996b362-8f06-46a3-851d-5b8c8559afb4
 
 Binary which create a ready project to run a server with preinstalled dependencies/tools:
 
-- ✅ `gin`
+- ✅ `gin` / `fiber`
 - ✅ `viper`
 - ✅ `pgxpool`/`mysql`/`go-sqlite3`
 - ✅ `jwt`
