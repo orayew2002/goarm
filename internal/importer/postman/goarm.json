@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "6112bb29-e30c-414a-960a-3f038438b38b",
+		"name": "PROJ38 GoArm",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18768977",
+		"_collection_link": "https://cloudy-capsule-248401.postman.co/workspace/FutZone~409d423f-66f2-4e1a-8e8b-c45faa0072b4/collection/18768977-6112bb29-e30c-414a-960a-3f038438b38b?action=share&source=collection_link&creator=18768977"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users/:userID",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								":userID"
+							],
+							"variable": [
+								{
+									"key": "userID",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "",
+									"contentType": "string",
+									"type": "text"
+								},
+								{
+									"key": "age",
+									"value": "",
+									"contentType": "int",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "",
+									"contentType": "string",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/users",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users/:userID",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								":userID"
+							],
+							"variable": [
+								{
+									"key": "userID",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users/:userID",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								":userID"
+							],
+							"variable": [
+								{
+									"key": "userID",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		}
+	]
+}
